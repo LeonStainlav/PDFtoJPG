@@ -31,12 +31,37 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+        }
+
+        .running-text {
+            width: 100%;
+            max-width: 650px;
+            overflow: hidden;
+            white-space: nowrap;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 20px;
+            background: #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .running-text span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
         }
 
         .container {
@@ -139,9 +164,15 @@
             transform: translateY(-1px);
         }
         .btn-saweria svg { width: 16px; height: 16px; fill: currentColor; }
+        
+        #smile-emoji { display: none; font-size: 24px; margin-left: 10px; }
     </style>
 </head>
 <body>
+
+<div class="running-text">
+    <span>✨ Selamat datang di Smart PDF Converter! Konversi file PDF ke JPG/ZIP jadi lebih mudah dan cepat! ✨ Dukung server kami via Saweria! ✨</span>
+</div>
 
 <div class="container">
     <h2>Smart PDF to JPG Converter</h2>
@@ -159,10 +190,8 @@
     <div id="status-container"></div>
 
     <div class="donation-box">
-        <img src="https://i.postimg.cc/d3pCZ9Rg/Screenshot-2026-06-05-043054.png" alt="Karya Saya" style="max-width: 140px; border-radius: 12px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-        
-        <p>Web ini membantu Anda? Dukung kelangsungan server dengan segelas kopi digital:</p>
-        <a href="https://saweria.co/LeonStainlav" target="_blank" class="btn-saweria">
+        <p>Web ini membantu Anda? Dukung kelangsungan server dengan segelas kopi digital: <span id="smile-emoji">😊</span></p>
+        <a href="https://saweria.co/LeonStainlav" target="_blank" class="btn-saweria" id="saweria-btn">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M2 21h18v-2H2v2M20 8h-2V5h2v3m0-5h-4v7h4a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3M4 19h10c1.1 0 2-.9 2-2V5H2v12c0 1.1.9 2 2 2Z"/>
             </svg>
@@ -173,6 +202,9 @@
 
 <canvas id="hidden-canvas"></canvas>
 
+<audio id="hover-sound" src="https://videotourl.com/audio/1780611581964-32e93e44-3f5b-44a4-8c75-da0606b461b3.mp3" preload="auto"></audio>
+<audio id="saweria-sound" src="https://videotourl.com/audio/1780612039532-6ded5d96-1883-439e-8221-a4a64f4f1c31.mp3" preload="auto"></audio>
+
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
@@ -181,6 +213,21 @@
     const statusContainer = document.getElementById('status-container');
     const canvas = document.getElementById('hidden-canvas');
     const ctx = canvas.getContext('2d');
+    const hoverSound = document.getElementById('hover-sound');
+    const saweriaSound = document.getElementById('saweria-sound');
+    const saweriaBtn = document.getElementById('saweria-btn');
+    const smileEmoji = document.getElementById('smile-emoji');
+
+    dropZone.addEventListener('mouseenter', () => {
+        hoverSound.currentTime = 0;
+        hoverSound.play().catch(e => console.log("Menunggu interaksi pengguna..."));
+    });
+
+    saweriaBtn.addEventListener('click', () => {
+        saweriaSound.currentTime = 0;
+        saweriaSound.play();
+        smileEmoji.style.display = 'inline';
+    });
 
     ['dragenter', 'dragover'].forEach(name => {
         dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); }, false);
