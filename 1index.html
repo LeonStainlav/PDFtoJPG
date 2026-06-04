@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium PDF to JPG Converter (Auto-ZIP & Offline)</title>
+    
+    <meta name="description" content="Konversi file PDF ke JPG online gratis dan aman. Logika pintar: otomatis menjadi file JPG jika satu halaman, dan otomatis menjadi ZIP jika dokumen memiliki banyak halaman.">
+    <meta name="keywords" content="pdf to jpg, convert pdf to jpg, pdf to zip, ubah pdf ke gambar, converter pintar pdf">
+    <meta name="robots" content="index, follow">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #ec4899;
+            --primary-hover: #db2777;
+            --success: #10b981;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --saweria: #fa9c1b;
+            --saweria-hover: #e0850b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        h2 { font-size: 28px; font-weight: 700; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+        p.subtitle { color: var(--text-muted); margin: 0 0 32px 0; font-size: 14px; }
+        
+        .drop-zone {
+            border: 2px dashed #475569;
+            border-radius: 14px;
+            padding: 50px 20px;
+            cursor: pointer;
+            background-color: #111827;
+            transition: all 0.25s ease;
+        }
+        .drop-zone:hover {
+            border-color: var(--primary);
+            background-color: #1f1228;
+            transform: scale(1.01);
+        }
+        .drop-zone.drag-over {
+            border-color: var(--success);
+            background-color: #064e3b;
+        }
+        .drop-zone svg { width: 48px; height: 48px; color: var(--text-muted); margin-bottom: 16px; transition: transform 0.3s ease; }
+        .drop-zone:hover svg { color: var(--primary); transform: translateY(-5px); }
+        .drop-zone p { margin: 0; font-size: 16px; font-weight: 500; color: #e2e8f0; }
+        .drop-zone span { display: block; font-size: 13px; color: var(--text-muted); margin-top: 8px; }
+        
+        #file-input { display: none; }
+        
+        #status-container {
+            margin-top: 25px;
+            text-align: left;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .status-item {
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            background-color: #111827;
+            border-left: 4px solid #475569;
+        }
+        
+        .status-working { border-left-color: var(--primary); }
+        .status-success { border-left-color: var(--success); }
+        .status-error { border-left-color: var(--error); }
+
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .file-info { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%; }
+        .badge { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+        
+        .status-working .badge { background: rgba(236, 72, 153, 0.2); color: var(--primary); }
+        .status-success .badge { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-error .badge { background: rgba(239, 68, 68, 0.2); color: var(--error); }
+
+        .progress-track { width: 100%; height: 6px; background: #334155; border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.2s ease; }
+        .status-success .progress-fill { background: var(--success); width: 100% !important; }
+
+        #hidden-canvas { display: none; }
+
+        /* Style Box Donasi Saweria */
+        .donation-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #111827;
+            border-radius: 14px;
+            border: 1px solid #1e293b;
+        }
+        .donation-box p { font-size: 13px; color: var(--text-muted); margin: 0 0 12px 0; }
+        .btn-saweria {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--saweria);
+            color: #ffffff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(250, 156, 27, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-saweria:hover {
+            background-color: var(--saweria-hover);
+            box-shadow: 0 6px 15px rgba(250, 156, 27, 0.3);
+            transform: translateY(-1px);
+        }
+        .btn-saweria svg { width: 16px; height: 16px; fill: currentColor; }
+
+        .seo-text {
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+            text-align: left;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .seo-text h3 { color: #fff; margin-bottom: 6px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Smart PDF to JPG Converter</h2>
+    <p class="subtitle">Satu Halaman ➜ Langsung JPG • Banyak Halaman ➜ Otomatis ZIP</p>
+    
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p>Seret & lepaskan file dokumen PDF ke sini</p>
+        <span>atau klik untuk memilih file dari komputer</span>
+    </div>
+    <input type="file" id="file-input" multiple accept=".pdf">
+    
+    <div id="status-container"></div>
+
+    <div class="donation-box">
+        <p>Web ini membantu Anda? Dukung kelangsungan server dengan segelas kopi digital:</p>
+        <a href="https://saweria.co/LeonStainlav" target="_blank" class="btn-saweria">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 21h18v-2H2v2M20 8h-2V5h2v3m0-5h-4v7h4a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3M4 19h10c1.1 0 2-.9 2-2V5H2v12c0 1.1.9 2 2 2Z"/>
+            </svg>
+            Dukung via Saweria
+        </a>
+    </div>
+
+    <div class="seo-text">
+        <h3>Sistem Konversi Pintar PDF Ke Gambar Terkompresi</h3>
+        <p>Gunakan layanan konversi termutakhir yang mendeteksi jumlah halaman secara otomatis. Dokumen tunggal akan langsung diunduh sebagai gambar JPG resolusi tinggi, sementara dokumen tebal langsung dibundel dalam arsip ZIP demi kenyamanan penyimpanan Anda. Keamanan 100% karena pemrosesan murni terjadi di sisi client browser Anda.</p>
+    </div>
+</div>
+
+<canvas id="hidden-canvas"></canvas>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const statusContainer = document.getElementById('status-container');
+    const canvas = document.getElementById('hidden-canvas');
+    const ctx = canvas.getContext('2d');
+
+    ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); });
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+
+    function handleFiles(files) {
+        for (let file of files) {
+            if (file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf')) {
+                processPdf(file);
+            } else {
+                alert("Mohon masukkan file berformat PDF saja!");
+            }
+        }
+    }
+
+    function processPdf(file) {
+        const fileId = 'pdf-' + Math.random().toString(36).substr(2, 9);
+        const cleanName = file.name.replace(/\.pdf$/i, '');
+        
+        const card = document.createElement('div');
+        card.className = 'status-item status-working';
+        card.id = fileId;
+        card.innerHTML = `
+            <div class="status-header">
+                <div class="file-info">${file.name}</div>
+                <div class="badge" id="badge-${fileId}">Mengekstrak...</div>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="progress-${fileId}"></div></div>
+        `;
+        statusContainer.insertBefore(card, statusContainer.firstChild);
+
+        const progressBar = document.getElementById(`progress-${fileId}`);
+        const badge = document.getElementById(`badge-${fileId}`);
+
+        const fileReader = new FileReader();
+        fileReader.onload = function () {
+            const typedarray = new Uint8Array(this.result);
+
+            pdfjsLib.getDocument(typedarray).promise.then(async function (pdf) {
+                const totalPages = pdf.numPages;
+                const zip = new JSZip();
+                let singleImgData = null;
+
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    badge.innerText = `Halaman ${pageNum} / ${totalPages}`;
+                    
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const renderContext = { canvasContext: ctx, viewport: viewport };
+                    await page.render(renderContext).promise;
+
+                    const imgData = canvas.toDataURL('image/jpeg', 0.9);
+
+                    if (totalPages === 1) {
+                        singleImgData = imgData;
+                    } else {
+                        const base64Data = imgData.split(',')[1];
+                        zip.file(`${cleanName}_Halaman_${pageNum}.jpg`, base64Data, {base64: true});
+                    }
+
+                    let percent = Math.round((pageNum / totalPages) * 100);
+                    progressBar.style.width = percent + '%';
+                }
+
+                if (totalPages === 1) {
+                    triggerDownload(singleImgData, `${cleanName}.jpg`);
+                    card.className = 'status-item status-success';
+                    badge.innerText = 'Sukses (.JPG)';
+                } else {
+                    badge.innerText = "Mengompres ZIP...";
+                    zip.generateAsync({type: "blob"}).then(function (content) {
+                        const url = URL.createObjectURL(content);
+                        triggerDownload(url, `${cleanName}_Images.zip`);
+                        URL.revokeObjectURL(url);
+
+                        card.className = 'status-item status-success';
+                        badge.innerText = 'Sukses (.ZIP)';
+                    });
+                }
+
+            }).catch(function (error) {
+                card.className = 'status-item status-error';
+                badge.innerText = 'Gagal Membaca';
+                progressBar.style.backgroundColor = 'var(--error)';
+            });
+        };
+        
+        fileReader.readAsArrayBuffer(file);
+    }
+
+    function triggerDownload(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
+</body>
+</html>
