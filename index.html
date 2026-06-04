@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium PDF to JPG Converter (Auto-ZIP & Offline)</title>
+    <title>Smart PDF to JPG Converter (Offline & Aman)</title>
     
     <meta name="description" content="Konversi file PDF ke JPG online gratis dan aman. Logika pintar: otomatis menjadi file JPG jika satu halaman, dan otomatis menjadi ZIP jika dokumen memiliki banyak halaman.">
     <meta name="keywords" content="pdf to jpg, convert pdf to jpg, pdf to zip, ubah pdf ke gambar, converter pintar pdf">
     <meta name="robots" content="index, follow">
 
+    <!-- Library Utama (PDF.js & JSZip) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
@@ -140,17 +141,6 @@
             transform: translateY(-1px);
         }
         .btn-saweria svg { width: 16px; height: 16px; fill: currentColor; }
-
-        .seo-text {
-            margin-top: 35px;
-            padding-top: 20px;
-            border-top: 1px solid #334155;
-            text-align: left;
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-        .seo-text h3 { color: #fff; margin-bottom: 6px; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -170,6 +160,7 @@
     
     <div id="status-container"></div>
 
+    <!-- Kotak Donasi Terintegrasi dengan Saweria LeonStainlav -->
     <div class="donation-box">
         <p>Web ini membantu Anda? Dukung kelangsungan server dengan segelas kopi digital:</p>
         <a href="https://saweria.co/LeonStainlav" target="_blank" class="btn-saweria">
@@ -178,11 +169,6 @@
             </svg>
             Dukung via Saweria
         </a>
-    </div>
-
-    <div class="seo-text">
-        <h3>Sistem Konversi Pintar PDF Ke Gambar Terkompresi</h3>
-        <p>Gunakan layanan konversi termutakhir yang mendeteksi jumlah halaman secara otomatis. Dokumen tunggal akan langsung diunduh sebagai gambar JPG resolusi tinggi, sementara dokumen tebal langsung dibundel dalam arsip ZIP demi kenyamanan penyimpanan Anda. Keamanan 100% karena pemrosesan murni terjadi di sisi client browser Anda.</p>
     </div>
 </div>
 
